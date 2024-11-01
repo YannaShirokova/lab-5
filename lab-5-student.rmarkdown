@@ -16,6 +16,8 @@ format:
     toc: true
 ---
 
+
+
 For this lab, you will be joining and filtering related datasets to solve a murder mystery!
 
 ## Instructions
@@ -43,6 +45,8 @@ You may find the `pull()` function handy for displaying each clue as you go alon
 
 This code chunk will read in all of the tables of data for you. Don't modify or remove this!
 
+
+
 ```{r}
 #| message: false
 #| warning: false
@@ -56,6 +60,8 @@ if (!"purrr" %in% installed.packages()) install.packages("purrr")
 source("https://raw.githubusercontent.com/atheobold/groupworthy-data-science/main/labs/instructions/lab-5-setup.R")
 ```
 
+
+
 ## Solve the Crime
 
 ### Crime Scene Report
@@ -66,6 +72,8 @@ Detective Wickham reaches out to you...
 
 **Follow the evidence to the person responsible for the murder, building a report as you go.**
 Hint: Make sure you check for interviews with any suspects!
+
+
 
 ```{r}
 #| label: inspecting-crime-scene-report
@@ -82,7 +90,11 @@ crime_scene_report |>
   select(description)
 
 ```
+
+
 ### Looking at Witnesses
+
+
 ```{r}
 #| label: looking-at-witnesses
 
@@ -101,7 +113,11 @@ person |>
   select(transcript)
 
 ```
+
+
 ### Finding The Inital Suspect and Interview 
+
+
 ```{r}
 #| label: finding-the-inital-suspect 
 
@@ -139,7 +155,11 @@ get_fit_now_member |>
   select(name, transcript)
 
 ```
+
+
 ### Finding the Murderer
+
+
 ```{r}
 #| label: finding-the-murderer
 
@@ -181,10 +201,13 @@ drivers_license |>
 
 ```
 
+
+
 ## And the final suspect is... 
 
 *Put the name of the person responsible for the murder here:*
 Miranda Priestly!
+
 
 
 
