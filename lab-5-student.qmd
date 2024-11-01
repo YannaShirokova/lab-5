@@ -74,13 +74,11 @@ Hint: Make sure you check for interviews with any suspects!
 # Murder
 # Jan 15, 2018
 # SQL city
-
-# FIXED
 crime_scene_report |>
   mutate(date = ymd(date)) |>
   filter(city == "SQL City", 
          type == "murder", 
-         date == ymd(20180115)) |>
+         date == ymd(20180115)) |> 
   select(description)
 
 ```
@@ -103,33 +101,28 @@ person |>
   select(transcript)
 
 ```
-### Finding the Murderer based on Interviews
+### Finding The Inital Suspect and Interview 
 ```{r}
-#| label: finding-the-murderer
+#| label: finding-the-inital-suspect 
 
 # Lets see what we can find from the interviews
 
 # Clues: 
 # The membership number on the bag started with "48Z"
 # I was working out last week on January the 9th
-
-# FIXED
 membership_ids <- get_fit_now_check_in |>
   filter(str_detect(membership_id, "^48Z"),
          ymd(check_in_date) == ymd("2018-01-09")) |>
   select(membership_id)
 
 # Clue: The man got into a car with a plate that included "H42W"
-#FIXED
 driver_ids <- drivers_license |>
   filter(gender == "male", 
          str_detect(plate_number, "H42W")) |>
   select(id) |>
   rename(license_id = id) 
 
-
 # Find the person id from driver_ids (above)
-# FIXED
 person_ids <- driver_ids |>
   inner_join(person, by = "license_id") |>
   select(id)
@@ -137,24 +130,29 @@ person_ids <- driver_ids |>
 # Join on the person id from person_ids (above)
 # Join on the membership_ids (above)
 # Clue: Only gold members have those bags. 
+# Find the suspect and interview!
 get_fit_now_member |>
   inner_join(person_ids, by = c("person_id" = "id")) |>
   inner_join(membership_ids, by = c("id" = "membership_id")) |>
-  filter(membership_status == "gold")
+  filter(membership_status == "gold") |>
+  inner_join(interview, by = "person_id") |>
+  select(name, transcript)
 
 ```
-### Finding The Person Behind The Murder
+### Interviweing Inital Suspect
 ```{r}
-#| label: finding-the-person-behind-the-murder
+#| label: interviweing-inital-suspect
 
-# ADDED
+# GROWING/ REFLECTION: In my original lab, I missed this whole step! I just 
+# found who did the murdering (Jeremy Bowers), but not the mind behind the 
+# murder. Above, I added an inner_join (with interview data) at the end to see
+# the transcript from our initial suspect! I got many more clues. By adding these
+# changes I was able to find the actual murderer, which was Miranda Priestly. I
+# also confirmed she was the murderer by looking at her interview, which
+# she doesn't! This was important code to add as I didn't find the actual
+# murderer before.
 
-# Look at Jeremy Bowers (murderer) interview
-interview |>
-  filter(person_id == "67318") |>
-  select(transcript)
-
-# Transcript/ Clues:
+# Transcript/ Clues (from above):
 # I was hired by a woman with a lot of money. I don't know her name but 
 # I know she's around 5'5" (65") or 5'7" (67"). She has red hair and she 
 # drives a Tesla Model S. I know that she attended the SQL Symphony Concert 
@@ -168,24 +166,25 @@ drivers_license |>
     car_make == "Tesla",           
     car_model == "Model S"          
   ) |>
-  right_join(person, by = "license_id") |>
-  # get rid of na columns from right join
-  drop_na() |>
+  left_join(person, by = "license_id") |>
   inner_join(facebook_event_checkin, by = c("id" = "person_id")) |>
-  filter(startsWith(as.character(date), "2017")) |>
-  group_by(id, event_name) |>
+  # since date is a double, change to character first
+  filter(str_starts(as.character(date), "2017"),
+         event_name == "SQL Symphony Concert") |>
+  group_by(id) |>
   summarise(event_count = n(), .groups = "drop") |>
   filter(event_count == 3) |>
-  inner_join(person, by = "id")
+  inner_join(person, by = "id") |>
+  left_join(interview, by = c("id" = "person_id")) |>
+  # Confirm new suspect = shouldn't have an interview 
+  select(name, transcript)
 
 ```
 
 ## And the final suspect is... 
 
 *Put the name of the person responsible for the murder here:*
-
-Jeremy Bowers was the murderer.
-The person who set it up was Miranda Priestly!
+Miranda Priestly!
 
 
 
